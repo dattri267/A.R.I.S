@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A.R.I.S</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Geist:wght@400;500;700&display=swap"
+    rel="stylesheet" />
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#e0b08f",
+            "primary-container": "#c9743f",
+            "on-primary": "#2e1c0f",
+            "secondary": "#4edea3",
+            "secondary-container": "#00a572",
+            "on-secondary": "#003824",
+            "tertiary": "#ffb95f",
+            "tertiary-container": "#ca8100",
+            "error": "#ffb4ab",
+            "error-container": "#93000a",
+            "on-error-container": "#ffdad6",
+            "surface": "#14171d",
+            "surface-container": "#1a1d24",
+            "surface-container-low": "#181b21",
+            "surface-container-high": "#23262d",
+            "surface-container-highest": "#2c2f37",
+            "surface-container-lowest": "#0b0d11",
+            "outline": "#80868f",
+            "outline-variant": "#3a3d44",
+            "on-surface": "#e8e9ec",
+            "on-surface-variant": "#b8bcc4",
+            "on-secondary-container": "#00311f",
+            "on-tertiary-container": "#3e2400",
+          },
+          fontFamily: {
+            mono: ["JetBrains Mono", "monospace"],
+            sans: ["Inter", "sans-serif"],
+            geist: ["Geist", "monospace"],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --bg: #0b0d11;
+      --panel: rgba(20, 23, 29, 0.92);
+      --border: rgba(255, 255, 255, 0.1);
+      --accent: #c9743f;
+      --accent2: #00e5b0;
+      --text: #d8dadf;
+      --muted: #80868f;
+      --red: #ff4d6d;
+      --orange: #ffb347;
+      --green: #00e5b0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px,
+          rgba(201, 116, 63, 0.015) 2px, rgba(201, 116, 63, 0.015) 4px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    /* ── TAB NAV ── */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      background: rgba(20, 23, 29, 0.97);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .tab-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 14px 28px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      letter-spacing: 0.5px;
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-btn:hover:not(.active) {
+      color: var(--text);
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* ────────────────────── WAR ROOM (index.html) ────────────────────── */
+    .wr-page {
+      position: relative;
+      z-index: 1;
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+    }
+
+    header.wr-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .wr-header .header-left h1 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .wr-header .header-left h1 span {
+      color: var(--accent);
+    }
+
+    .wr-header .header-left p {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 229, 176, 0.08);
+      border: 1px solid rgba(0, 229, 176, 0.25);
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-size: 0.73rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent2);
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent2);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .4;
+        transform: scale(.7)
+      }
+    }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(8px);
+    }
+
+    .wr-section {
+      margin-bottom: 28px;
+    }
+
+    .fusion-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .fusion-card {
+      background: rgba(201, 116, 63, 0.06);
+      border: 1px solid rgba(79, 140, 255, 0.15);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .fusion-card .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .fusion-card .value {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .zone-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    select.wr-select {
+      background: rgba(13, 22, 42, 0.95);
+      border: 1px solid rgba(79, 140, 255, 0.3);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      padding: 10px 16px;
+      border-radius: 8px;
+      outline: none;
+      cursor: pointer;
+      flex: 1;
+      min-width: 220px;
+      max-width: 400px;
+      transition: border-color 0.2s;
+    }
+
+    select.wr-select:hover {
+      border-color: var(--accent);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    @media(max-width:700px) {
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .metric-card {
+      background: rgba(20, 23, 29, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .metric-card .m-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .metric-card .m-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .risk-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-top: 12px;
+    }
+
+    .attr-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    @media(max-width:600px) {
+      .attr-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .attr-card {
+      background: rgba(20, 23, 29, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .attr-card .a-label {
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .attr-card .a-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .bar-track {
+      height: 6px;
+      background: rgba(79, 140, 255, 0.1);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 100px;
+      transition: width 0.6s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .info-box {
+      background: rgba(79, 140, 255, 0.07);
+      border: 1px solid rgba(201, 116, 63, 0.2);
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--text);
+    }
+
+    .info-box .zone-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .warn-box {
+      background: rgba(255, 179, 71, 0.07);
+      border: 1px solid rgba(255, 179, 71, 0.25);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: #ffe0a0;
+    }
+
+    #wr-map {
+      width: 100%;
+      height: 380px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .forecast-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .forecast-card {
+      background: rgba(255, 179, 71, 0.06);
+      border: 1px solid rgba(255, 179, 71, 0.2);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .forecast-card .fc-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .forecast-card .fc-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--orange);
+    }
+
+    .command-box {
+      background: rgba(201, 116, 63, 0.06);
+      border: 1px solid rgba(201, 116, 63, 0.18);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+      font-size: 0.83rem;
+      line-height: 1.7;
+    }
+
+    .confidence-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .confidence-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .confidence-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent2);
+    }
+
+    .btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn:hover {
+      opacity: 0.85;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #a85f33);
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: rgba(0, 229, 176, 0.12);
+      border: 1px solid rgba(0, 229, 176, 0.3);
+      color: var(--accent2);
+    }
+
+    .action-card {
+      background: rgba(0, 229, 176, 0.06);
+      border: 1px solid rgba(0, 229, 176, 0.2);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .action-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--accent2);
+    }
+
+    .action-tags {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tag {
+      font-size: 0.68rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 3px 10px;
+      border-radius: 100px;
+      background: rgba(201, 116, 63, 0.12);
+      border: 1px solid rgba(201, 116, 63, 0.2);
+      color: var(--accent);
+    }
+
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .sim-card {
+      background: rgba(20, 23, 29, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .sim-card .s-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 6px;
+    }
+
+    .sim-card .s-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .health-box {
+      background: rgba(255, 77, 109, 0.08);
+      border: 1px solid rgba(255, 77, 109, 0.25);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: #ffb0bc;
+    }
+
+    .health-box ul {
+      padding-left: 18px;
+    }
+
+    .learn-box {
+      background: rgba(0, 229, 176, 0.06);
+      border: 1px solid rgba(0, 229, 176, 0.18);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: #a0ffe8;
+    }
+
+    .hidden-sec {
+      display: none !important;
+    }
+
+    .loader {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(201, 116, 63, 0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-left: 8px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ────────────────────── DASHBOARD ────────────────────── */
+    /*.db-body { background: #14171d; color: #e8e9ec; min-height: 100vh; }
+
+    .glass-panel {
+      background: rgba(11,13,17,0.8); backdrop-filter: blur(8px);
+      border: 1px solid #1a1d24;
+    }
+
+    .data-grid-zebra div:nth-child(even) { background-color: rgba(255,255,255,0.02); }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #14171d; }
+    ::-webkit-scrollbar-thumb { background: #1a1d24; border-radius: 10px; }
+
+    @keyframes pulse-border {
+      0%   { border-color: #1a1d24; }
+      50%  { border-color: #e0b08f; }
+      100% { border-color: #1a1d24; }
+    }
+    .sim-ready { animation: pulse-border 2s infinite; }
+
+    .map-grid {
+      background-size: 40px 40px;
+      background-image: radial-gradient(circle, #1a1d24 1px, transparent 1px);
+    }
+
+    .plume-particle { filter: blur(20px); animation: drift 10s infinite linear; }
+
+    @keyframes drift { from { transform: translate(0,0); } to { transform: translate(100px,-50px); } }
+/* 
+    /* DB table zebra — use tr-based */
+    /*.db-table tr:nth-child(even) { background-color: rgba(255,255,255,0.02); }*/
+
+    /* Custom select inside dashboard */
+    /* select.db-select {
+      background: #23262d; border: 1px solid #3a3d44; color: #e8e9ec;
+      border-radius: 4px; padding: 8px 36px 8px 16px; font-family: 'Inter', sans-serif;
+      font-size: 0.9rem; outline: none; cursor: pointer; width: 16rem; appearance: none;
+    } */
+  </style>
+</head>
+
+<body>
+
+  <!-- ── TAB BAR ── -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('warroom', this)">Environmental Operations</button>
+  </div>
+
+  <!-- ═══════════════════════════ WAR ROOM ═══════════════════════════ -->
+  <div id="tab-warroom" class="tab-pane active">
+    <div class="wr-page">
+
+      <header class="wr-header">
+        <div class="header-left">
+          <h1>Atmospheric Risk <span>Intelligence</span> System (A.R.I.S)</h1>
+          <p>Closed-loop Decision Intelligence System for Pollution Control</p>
+        </div>
+        <div class="status-pill">
+          <div class="pulse"></div>
+          AI Model: Multi-source Geospatial Attribution + Forecasting Engine
+        </div>
+      </header>
+
+      <!-- DATA FUSION LAYER -->
+      <div class="wr-section">
+        <div class="section-label">Data Fusion Layer</div>
+        <div class="fusion-grid">
+          <div class="fusion-card">
+            <div class="label">CAAQMS Stations</div>
+            <div class="value">Real-time AQI feeds (embedded)</div>
+          </div>
+          <div class="fusion-card">
+            <div class="label">Satellite Imagery (Sentinel)</div>
+            <div class="value">Thermal anomaly detection</div>
+          </div>
+          <div class="fusion-card">
+            <div class="label">Traffic API</div>
+            <div class="value">Vehicle density patterns</div>
+          </div>
+          <div class="fusion-card">
+            <div class="label">Weather API</div>
+            <div class="value">Wind + dispersion modelling</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ZONE SELECT -->
+      <div class="wr-section panel">
+        <div class="section-label"> Select Zone</div>
+        <div class="zone-row">
+          <select id="wrZoneSelect" class="wr-select">
+            <option value="">— Select a zone —</option>
+          </select>
+          <span id="wrSpinner" class="loader hidden-sec"></span>
+        </div>
+      </div>
+
+      <!-- LIVE ZONE METRICS -->
+      <div class="wr-section hidden-sec" id="wrMetrics">
+        <div class="section-label">Live Zone Metrics</div>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="m-label"> Traffic</div>
+            <div class="m-value" id="wrTraffic">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="m-label"> Construction</div>
+            <div class="m-value" id="wrConst">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="m-label"> Industry</div>
+            <div class="m-value" id="wrIndustry">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="m-label"> Wind</div>
+            <div class="m-value" id="wrWind">—</div>
+          </div>
+        </div>
+        <div id="wrRiskBadge" class="risk-badge">—</div>
+      </div>
+
+      <!-- AI SOURCE ATTRIBUTION -->
+      <div class="wr-section hidden-sec" id="wrAttribution">
+        <div class="section-label"> AI Source Attribution Engine</div>
+        <div class="attr-grid">
+          <div class="attr-card">
+            <div class="a-label"> Traffic</div>
+            <div class="a-value" id="attrTraffic">—</div>
+            <div class="bar-track">
+              <div class="bar-fill" id="barTraffic" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="attr-card">
+            <div class="a-label"> Construction</div>
+            <div class="a-value" id="attrConst">—</div>
+            <div class="bar-track">
+              <div class="bar-fill" id="barConst" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="attr-card">
+            <div class="a-label"> Industry</div>
+            <div class="a-value" id="attrIndustry">—</div>
+            <div class="bar-track">
+              <div class="bar-fill" id="barIndustry" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GEOSPATIAL -->
+      <div class="wr-section hidden-sec" id="wrGeo">
+        <div class="section-label"> Geospatial Intelligence</div>
+        <div class="info-box">
+          <div class="zone-name" id="wrGeoZone">—</div>
+          <strong>Hotspot Classification:</strong><br>
+          • High emission cluster detected<br>
+          • Traffic + construction overlap identified<br>
+          • Pollution accumulation due to low dispersion
+        </div>
+      </div>
+
+      <!-- MAP -->
+      <div class="wr-section hidden-sec" id="wrMapSection">
+        <div class="section-label"> Pollution Hotspot Map</div>
+        <div id="wr-map"></div>
+      </div>
+
+      <!-- SATELLITE -->
+      <div class="wr-section hidden-sec" id="wrSatellite">
+        <div class="section-label">🛰️ Satellite Insight</div>
+        <div class="warn-box">
+          <strong>Thermal anomaly detected in this zone.</strong><br><br>
+          Possible causes:<br>
+          • Construction dust emissions<br>
+          • Industrial heat signatures<br>
+          • Urban heat island effect
+        </div>
+      </div>
+
+      <!-- FORECAST -->
+      <div class="wr-section hidden-sec" id="wrForecast">
+        <div class="section-label"> Hyperlocal AQI Forecasting Model (24–12 hr)</div>
+        <div class="forecast-row">
+          <div class="forecast-card">
+            <div class="fc-label">Next 6 Hours → AQI</div>
+            <div class="fc-value" id="wrFc6">—</div>
+          </div>
+          <div class="forecast-card">
+            <div class="fc-label">Next 12 Hours → AQI</div>
+            <div class="fc-value" id="wrFc12">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMMAND CENTER -->
+      <div class="wr-section hidden-sec" id="wrCommand">
+        <div class="section-label"> Command Center</div>
+        <div class="command-box" id="wrCommandText">—</div>
+        <div class="confidence-row">
+          <span class="confidence-label">Engine Confidence</span>
+          <span class="confidence-value" id="wrConfidence">—</span>
+        </div>
+        <button class="btn btn-primary" onclick="wrGeneratePlan()">Generate AI Intervention Plan</button>
+      </div>
+
+      <!-- INTERVENTION PLAN -->
+      <div class="wr-section hidden-sec" id="wrPlan">
+        <div class="section-label"> AI Intervention Plan</div>
+        <div id="wrActionList"></div>
+
+        <div style="margin-top:16px;">
+          <div class="section-label"> Resource Allocation</div>
+          <div class="info-box">
+            <strong>Available Resources:</strong><br>
+            • 1 Traffic Unit<br>
+            • 1 Inspection Team<br><br>
+            - System selected highest impact actions within constraints
+          </div>
+        </div>
+
+        <div id="wrMissed" class="hidden-sec" style="margin-top:14px;">
+          <div class="section-label"> Missed Opportunity Analysis</div>
+          <div class="warn-box" id="wrMissedText"></div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <button class="btn btn-secondary" onclick="wrSimulate()"> Simulate Impact</button>
+        </div>
+      </div>
+
+      <!-- SIMULATION RESULT -->
+      <div class="wr-section hidden-sec" id="wrSim">
+        <div class="section-label"> Simulation Result</div>
+        <div class="sim-grid">
+          <div class="sim-card">
+            <div class="s-label">Current Baseline</div>
+            <div class="s-value" id="wrSimOriginal" style="color:var(--red)">—</div>
+          </div>
+          <div class="sim-card">
+            <div class="s-label">Post-Intervention (Est.)</div>
+            <div class="s-value" id="wrSimNew" style="color:var(--green)">—</div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:18px;"> Accountability Report</div>
+        <div class="panel" style="margin-bottom:14px;">
+          <p style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;">
+            Total AQI Reduction: <span id="wrSimReduction" style="color:var(--accent2);font-weight:700;"></span>
+          </p>
+          <p style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;margin-top:6px;">
+            Zone Saturation: <span id="wrSimSaturation" style="color:var(--accent);"></span>
+          </p>
+        </div>
+
+        <div class="section-label"> Health Advisory</div>
+        <div class="health-box">
+          <ul>
+            <li>Avoid outdoor exercise</li>
+            <li>High risk for respiratory patients</li>
+            <li>Schools should limit outdoor activities</li>
+          </ul>
+        </div>
+
+        <div class="section-label" style="margin-top:18px;"> System Learning</div>
+        <div class="learn-box">
+          Previous actions improved AQI by expected range.<br>
+          Model confidence updated for future predictions.
+        </div>
+      </div>
+
+    </div><!-- end .wr-page -->
+  </div><!-- end #tab-warroom -->
+
+
+  <!-- ══════════════════════════ SCRIPTS ══════════════════════════ -->
+  <script>
+    // ─────────────────────────────────────────────────────────────────
+    //  EMBEDDED DATA  (replaces Flask + data.csv)
+    //  Each zone mirrors exactly what app.py would compute & return.
+    // ─────────────────────────────────────────────────────────────────
+    const ZONES_DB = {
+      "Zone A": { aqi: 280, traffic: 80, construction: 60, industry: 40, wind: 10, lat: 28.6139, lon: 77.2090 },
+      "Zone B": { aqi: 190, traffic: 50, construction: 30, industry: 20, wind: 20, lat: 28.6139, lon: 77.2090 },
+      "Zone C": { aqi: 310, traffic: 90, construction: 70, industry: 60, wind: 5, lat: 28.6139, lon: 77.2090 },
+      "Zone D": { aqi: 220, traffic: 65, construction: 40, industry: 30, wind: 15, lat: 28.6139, lon: 77.2090 },
+    };
+
+    // Assign approximate NCR coordinates per zone
+    const ZONE_COORDS = {
+      "Zone A": { lat: 28.6469, lon: 77.3164, label: "Anand Vihar" },
+      "Zone B": { lat: 28.7041, lon: 77.1025, label: "Rohini" },
+      "Zone C": { lat: 28.5921, lon: 77.0458, label: "Dwarka" },
+      "Zone D": { lat: 28.6270, lon: 77.3665, label: "Noida Sector 62" },
+    };
+
+    function computeZone(zoneName) {
+      const r = ZONES_DB[zoneName];
+      if (!r) return null;
+
+      const { aqi, traffic, construction, industry, wind } = r;
+      const coords = ZONE_COORDS[zoneName] || { lat: 28.6139, lon: 77.2090, label: "" };
+
+      // Risk
+      let risk, riskColor;
+      if (aqi > 300) { risk = "Severe"; riskColor = "#93000a"; }
+      else if (aqi > 200) { risk = "High"; riskColor = "#ca8100"; }
+      else { risk = "Moderate"; riskColor = "#00a572"; }
+
+      // Attribution
+      const ts = traffic * 0.4, cs = construction * 0.3, is_ = industry * 0.3;
+      const total = ts + cs + is_;
+      const tp = Math.round((ts / total) * 100);
+      const cp = Math.round((cs / total) * 100);
+      const ip = Math.round((is_ / total) * 100);
+
+      const causes = [];
+      if (tp > 30) causes.push("Traffic");
+      if (cp > 25) causes.push("Construction");
+      if (ip > 25) causes.push("Industry");
+
+      // Forecast
+      const future6 = aqi + 20, future12 = aqi + 40;
+      const confidence = Math.min(95, Math.round((tp + cp + ip) / 1.2));
+
+      return {
+        zone: zoneName,
+        aqi, traffic, construction, industry, wind,
+        lat: coords.lat, lon: coords.lon,
+        risk, riskColor,
+        trafficPct: tp, constPct: cp, industryPct: ip,
+        causes, future6, future12, confidence
+      };
+    }
+
+    function computePlan(zoneName) {
+      const d = computeZone(zoneName);
+      if (!d) return null;
+      const allActions = [];
+      if (d.causes.includes("Traffic")) allActions.push({ action: "Divert Traffic", impact: "High Impact", cost: "Low Cost", reduction: 20 });
+      if (d.causes.includes("Construction")) allActions.push({ action: "Halt Construction", impact: "Very High Impact", cost: "High Resistance", reduction: 25 });
+      if (d.causes.includes("Industry")) allActions.push({ action: "Inspect Industry", impact: "Medium Impact", cost: "Moderate Cost", reduction: 15 });
+      return { causes: d.causes, selected: allActions.slice(0, 2), skipped: allActions.slice(2) };
+    }
+
+    function simulateAQI(zoneName, actions) {
+      const r = ZONES_DB[zoneName];
+      if (!r) return null;
+      const reductions = { "Divert Traffic": 20, "Halt Construction": 25, "Inspect Industry": 15 };
+      let reduction = actions.reduce((acc, a) => acc + (reductions[a] || 0), 0);
+      const newAqi = Math.max(r.aqi - reduction, 50);
+      return { original: r.aqi, newAqi, reduction, saturation: Math.round((r.aqi / 500) * 100) };
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    //  TAB SWITCHING
+    // ─────────────────────────────────────────────────────────────────
+    // function switchTab(id, btn) {
+    //   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    //   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    //   document.getElementById('tab-' + id).classList.add('active');
+    //   btn.classList.add('active');
+
+    //   // Re-invalidate leaflet map size after tab shows
+    //   if (id === 'warroom' && wrMap) {
+    //     setTimeout(() => wrMap.invalidateSize(), 100);
+    //   }
+    // }
+
+    // ─────────────────────────────────────────────────────────────────
+    //  WAR ROOM LOGIC
+    // ─────────────────────────────────────────────────────────────────
+    let wrMap = null;
+    let wrCurrentZone = null;
+    let wrCurrentPlan = null;
+
+    function wrShow(id) { document.getElementById(id).classList.remove('hidden-sec'); }
+    function wrHide(id) { document.getElementById(id).classList.add('hidden-sec'); }
+    function wrSpinner(v) { document.getElementById('wrSpinner').classList.toggle('hidden-sec', !v); }
+
+    function wrResetPlan() {
+      wrHide('wrPlan'); wrHide('wrSim'); wrHide('wrMissed');
+      wrCurrentPlan = null;
+    }
+
+    (function wrInit() {
+      const sel = document.getElementById('wrZoneSelect');
+      Object.keys(ZONES_DB).forEach(z => {
+        const opt = document.createElement('option');
+        opt.value = z; opt.textContent = z + (ZONE_COORDS[z] ? ' — ' + ZONE_COORDS[z].label : '');
+        sel.appendChild(opt);
+      });
+      sel.addEventListener('change', () => { if (sel.value) wrLoadZone(sel.value); });
+    })();
+
+    function wrLoadZone(zone) {
+      wrSpinner(true);
+      wrResetPlan();
+      setTimeout(() => {
+        const d = computeZone(zone);
+        wrCurrentZone = d;
+        wrRender(d);
+        wrSpinner(false);
+      }, 300);
+    }
+
+    function wrRender(d) {
+      ['wrMetrics', 'wrAttribution', 'wrGeo', 'wrMapSection', 'wrSatellite', 'wrForecast', 'wrCommand'].forEach(wrShow);
+
+      // Metrics
+      document.getElementById('wrTraffic').textContent = d.traffic + '%';
+      document.getElementById('wrConst').textContent = d.construction + '%';
+      document.getElementById('wrIndustry').textContent = d.industry + '%';
+      document.getElementById('wrWind').textContent = d.wind + ' km/h';
+
+      // Risk badge
+      const rb = document.getElementById('wrRiskBadge');
+      const emojis = { Severe: '🔴', High: '🟠', Moderate: '🟢' };
+      rb.textContent = `AQI ${d.aqi} — ${d.risk} ${emojis[d.risk] || ''}`;
+      rb.style.background = d.riskColor;
+      rb.style.color = '#fff';
+
+      // Attribution bars
+      document.getElementById('attrTraffic').textContent = d.trafficPct + '%';
+      document.getElementById('attrConst').textContent = d.constPct + '%';
+      document.getElementById('attrIndustry').textContent = d.industryPct + '%';
+      setTimeout(() => {
+        document.getElementById('barTraffic').style.width = d.trafficPct + '%';
+        document.getElementById('barConst').style.width = d.constPct + '%';
+        document.getElementById('barIndustry').style.width = d.industryPct + '%';
+      }, 50);
+
+      // Geo
+      document.getElementById('wrGeoZone').textContent = '📍 ' + d.zone + (ZONE_COORDS[d.zone] ? ' — ' + ZONE_COORDS[d.zone].label : '');
+
+      // Map
+      if (wrMap) { wrMap.remove(); wrMap = null; }
+      wrMap = L.map('wr-map').setView([d.lat, d.lon], 12);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© CartoDB'
+      }).addTo(wrMap);
+      L.circleMarker([d.lat, d.lon], {
+        radius: 22, color: '#ff4d6d', fillColor: '#ff4d6d', fillOpacity: .35, weight: 2
+      }).addTo(wrMap).bindPopup(`<b>${d.zone}</b><br>AQI: ${d.aqi}`).openPopup();
+
+      // Forecast
+      document.getElementById('wrFc6').textContent = d.future6;
+      document.getElementById('wrFc12').textContent = d.future12;
+
+      // Command
+      const causes = d.causes.length ? d.causes.join(', ') : 'Low intensity mixed sources';
+      document.getElementById('wrCommandText').innerHTML =
+        `AI Engine detected multi-source pollution spike in <strong>${d.zone}</strong>.<br>
+     Risk projected to escalate to <strong>SEVERE</strong> levels within next 2–4 hours.<br>
+     Primary drivers: <strong style="color:var(--accent)">${causes}</strong>`;
+      document.getElementById('wrConfidence').textContent = d.confidence + '%';
+    }
+
+    function wrGeneratePlan() {
+      if (!wrCurrentZone) return;
+      wrSpinner(true);
+      wrResetPlan();
+      setTimeout(() => {
+        const plan = computePlan(wrCurrentZone.zone);
+        wrCurrentPlan = plan;
+        // Render plan
+        wrShow('wrPlan');
+        const list = document.getElementById('wrActionList');
+        list.innerHTML = '';
+        plan.selected.forEach(a => {
+          list.innerHTML += `
+        <div class="action-card">
+          <span class="action-name"> ${a.action}</span>
+          <div class="action-tags">
+            <span class="tag">${a.impact}</span>
+            <span class="tag">${a.cost}</span>
+          </div>
+        </div>`;
+        });
+        if (plan.skipped.length > 0) {
+          wrShow('wrMissed');
+          document.getElementById('wrMissedText').textContent =
+            `Skipping ${plan.skipped[0].action} may miss ~${plan.skipped[0].reduction} AQI reduction`;
+        }
+        wrSpinner(false);
+      }, 400);
+    }
+
+    function wrSimulate() {
+      if (!wrCurrentZone || !wrCurrentPlan) return;
+      wrSpinner(true);
+      const actions = wrCurrentPlan.selected.map(a => a.action);
+      setTimeout(() => {
+        const sim = simulateAQI(wrCurrentZone.zone, actions);
+        wrShow('wrSim');
+        document.getElementById('wrSimOriginal').textContent = sim.original + ' (Unhealthy)';
+        document.getElementById('wrSimNew').textContent = sim.newAqi + ' (Improved)';
+        document.getElementById('wrSimReduction').textContent = '−' + sim.reduction + ' AQI';
+        document.getElementById('wrSimSaturation').textContent = sim.saturation + '%';
+        wrSpinner(false);
+      }, 400);
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    //  DASHBOARD LOGIC
+    // ─────────────────────────────────────────────────────────────────
+    // (function dbInit() {
+    //   // Clock
+    //   function tick() { document.getElementById('dbClock').textContent = new Date().toLocaleTimeString(); }
+    //   setInterval(tick, 1000); tick();
+
+    //   // Populate zone select
+    //   const sel = document.getElementById('dbZoneSelect');
+    //   Object.keys(ZONES_DB).forEach((z, i) => {
+    //     const opt = document.createElement('option');
+    //     opt.value = z;
+    //     opt.textContent = z + (ZONE_COORDS[z] ? ' — ' + ZONE_COORDS[z].label : '');
+    //     if (i === 0) opt.selected = true;
+    //     sel.appendChild(opt);
+    //   });
+
+    //   dbUpdateZone(Object.keys(ZONES_DB)[0]);
+    // })();
+
+    // function dbUpdateZone(zoneName) {
+    //   const d = computeZone(zoneName);
+    //   if (!d) return;
+
+    //   // AQI
+    //   document.getElementById('dbAqiValue').textContent  = d.aqi;
+    //   document.getElementById('dbWindSpeed').textContent = d.wind + ' km/h';
+
+    //   // Risk badge
+    //   const rb = document.getElementById('dbRiskBadge');
+    //   const riskLabels = { Severe:'SEVERE RISK', High:'HIGH RISK', Moderate:'MODERATE RISK' };
+    //   rb.textContent = '⚠ ' + (riskLabels[d.risk] || d.risk);
+    //   rb.style.background = d.riskColor;
+    //   rb.style.color = '#fff';
+
+    //   // Forecast
+    //   document.getElementById('dbFc6').textContent   = d.future6;
+    //   document.getElementById('dbFc12').textContent  = d.future12;
+    //   document.getElementById('dbConfScore').textContent = d.confidence + '%';
+    //   document.getElementById('dbConfBar').style.width   = d.confidence + '%';
+    //   document.getElementById('dbConfText').textContent  = d.confidence + '%';
+    //   document.getElementById('dbActiveZone').textContent = d.zone;
+
+    //   // Contributors
+    //   document.getElementById('dbTrafficContrib').textContent  = d.trafficPct + '%';
+    //   document.getElementById('dbIndustryContrib').textContent = d.industryPct + '%';
+    //   document.getElementById('dbConstContrib').textContent    = d.constPct + '%';
+
+    //   // Badges
+    //   document.getElementById('dbTrafficBadge').textContent  = d.trafficPct > 35 ? 'HIGH' : 'NORMAL';
+    //   document.getElementById('dbIndustryBadge').textContent = d.industryPct > 35 ? 'HIGH' : 'NORMAL';
+    //   document.getElementById('dbConstBadge').textContent    = d.constPct > 30 ? 'HIGH' : 'NORMAL';
+
+    //   // Actions table
+    //   const plan = computePlan(zoneName);
+    //   const tbody = document.getElementById('dbActionsTable');
+    //   const allActions = [...(plan ? plan.selected : []), ...(plan ? plan.skipped : [])];
+
+    //   const entityMap = {
+    //     "Divert Traffic":    "Metropolitan Transit Authority",
+    //     "Halt Construction": "Urban Development Board",
+    //     "Inspect Industry":  "Regional Energy & Env. Grid",
+    //   };
+
+    //   tbody.innerHTML = allActions.length === 0
+    //     ? `<tr><td colspan="4" class="py-6 text-center text-outline text-sm">No critical actions flagged for this zone</td></tr>`
+    //     : allActions.map((a, i) => `
+    //       <tr class="hover:bg-surface-variant transition-colors border-b border-outline-variant/30">
+    //         <td class="py-4 px-4 font-bold text-on-surface">${a.action}</td>
+    //         <td class="py-4 px-4 text-on-surface-variant">${entityMap[a.action] || '—'}</td>
+    //         <td class="py-4 px-4 text-center text-secondary text-xs" style="font-family:'Geist',monospace">−${a.reduction} AQI</td>
+    //         <td class="py-4 px-4 text-right">
+    //           ${i < (plan ? plan.selected.length : 0)
+    //             ? `<span class="px-2 py-1 rounded bg-secondary/10 text-secondary text-[10px] font-bold border border-secondary/30">PENDING EXECUTION</span>`
+    //             : `<span class="px-2 py-1 rounded bg-outline-variant text-outline text-[10px] font-bold">NOT STARTED</span>`}
+    //         </td>
+    //       </tr>`).join('');
+    // }
+  </script>
+</body>
+
+</html>

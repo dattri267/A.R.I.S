@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pollution Control Dashboard</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg: #0b0d11;
+      --panel: #14171d;
+      --border: rgba(255,255,255,0.08);
+      --accent: #c9743f;
+      --text: #d8dadf;
+      --muted: #80868f;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 40px 20px;
+    }
+
+    /* NAV */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 60px;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: white;
+    }
+
+    .nav a {
+      color: var(--muted);
+      text-decoration: none;
+      margin-left: 20px;
+      font-size: 0.9rem;
+    }
+
+    .nav a:hover {
+      color: var(--accent);
+    }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+    }
+
+    .hero span {
+      color: var(--accent);
+    }
+
+    .hero p {
+      color: var(--muted);
+      max-width: 600px;
+      margin: auto;
+      margin-bottom: 25px;
+    }
+
+    .btn {
+      padding: 12px 26px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: black;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      margin-left: 10px;
+    }
+
+    /* FEATURES */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+      gap: 20px;
+      margin-bottom: 80px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .card h3 {
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    /* CTA */
+    .cta {
+      text-align: center;
+      padding: 40px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .cta h2 {
+      margin-bottom: 10px;
+    }
+
+    .cta p {
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 60px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+  </style>
+
+</head>
+<body>
+  <div class="container">
+
+    <!-- NAV -->
+    <div class="nav">
+      <div class="logo">Pollution<span style="color:#c9743f;">Control</span></div>
+      <div>
+        <a href="#">Home</a>
+        <a href="#">Features</a>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      </div>
+    </div>
+
+
+    <!-- FEATURES -->
+    <div class="features" id="features">
+      <div class="card">
+        <h3>Live AQI Tracking</h3>
+        <p>View real-time air quality updates across different zones.</p>
+      </div>
+
+      <div class="card">
+        <h3>Zone Insights</h3>
+        <p>Understand pollution levels in different regions easily.</p>
+      </div>
+
+      <div class="card">
+        <h3>Simple Dashboard</h3>
+        <p>Clean interface designed for quick decision-making.</p>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta">
+      <h2>Start Monitoring Today</h2>
+      <p>Access your dashboard and explore pollution data instantly.</p>
+      <a class="btn btn-primary" href="{{ url_for('dashboard') }}">Open Dashboard</a>
+    </div>
+
+    <footer>
+      © 2026 Pollution Control System
+    </footer>
+  </div>
+</body>
+</html>
